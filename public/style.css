@@ -8,6 +8,30 @@ body {
     background: #666;
 }
 
+.main {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000;
+    display: flex;
+}
+
+.main .main__left {
+    width: 80%;
+    border: thin solid #fff;
+}
+
+.main .main__right {
+    width: 20%;
+    border: thin solid #fff;
+}
+
+.main .main__right .main__header {}
+
+.main .main__right .main__header h5 {
+    color: #fff;
+}
+
 #video-grid {
     display: flex;
     justify-content: center;
@@ -17,4 +41,12 @@ video {
     height: 300px;
     width: 400px;
     object-fit: cover;
+}
+
+video#myVideo {
+    border: thin solid #f00;
+}
+
+video#remoteVideo {
+    border: thin solid #00f;
 }
