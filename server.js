@@ -30,6 +30,12 @@ io.on("connection", (socket) => {
     socket
       .to(roomId)
       .broadcast.emit("user-connected", { anotherUserId: peerId });
+    socket.on("message", (data) => {
+      const { msg } = data;
+      console.log(msg);
+
+      io.to(roomId).emit("create-message", { msg });
+    });
   });
   socket.on("disconnect", () => {
     console.log("+ user disconnected: ");

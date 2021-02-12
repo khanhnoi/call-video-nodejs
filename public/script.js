@@ -1,11 +1,15 @@
 const videoGrid = document.getElementById("video-grid");
 const btnCam = document.getElementById("onCam");
+const inputMsg = document.getElementById("inputMessageId");
+const muteBtnElm = $("#muteBtnId");
+const stopBtnElm = $("#stopBtnId");
 const socket = io("/");
 const peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
   port: "5000",
 });
+const callList = [];
 let myStreamVideoSave;
 
 peer.on("open", function (peerId) {
@@ -28,23 +32,33 @@ OpenStream().then(function (myVideoStream) {
     const { anotherUserId } = data;
     console.log("New User Joind: " + anotherUserId);
     //send
-    const call = peer.call(anotherUserId, myVideoStream);
+    const call = peer.call(anotherUserId, myVideoStream, {
+      metadata: { userId: peer.id },
+    });
     //recevice
     call.on("stream", function (remoteStreamVideo) {
       // Show stream in some video/canvas element.
-      console.log("remote of send");
-      playVideoStream("remoteVideo", remoteStreamVideo);
+      if (!callList[call.peer]) {
+        console.log("remote of send");
+        playVideoStream("remoteVideo", remoteStreamVideo);
+        callList[call.peer] = call;
+      }
     });
   });
 });
 
 peer.on("call", function (call) {
   OpenStream().then((myVideoStream) => {
+    myStreamVideoSave = myVideoStream;
     call.answer(myVideoStream); // Answer the call with an A/V stream.
+    console.log("answer");
     call.on("stream", function (remoteStreamVideo) {
       // Show stream in some video/canvas element.
-      console.log("remote of receive");
-      playVideoStream("remoteVideo", remoteStreamVideo);
+      if (!callList[call.peer]) {
+        console.log("remote of receive");
+        playVideoStream("remoteVideoReceive", remoteStreamVideo);
+        callList[call.peer] = call;
+      }
     });
   });
 });
@@ -57,33 +71,108 @@ function OpenStream() {
   });
 }
 
-const playVideoStream = (videoElmId, stream) => {
-  const remoteVideoElm = document.getElementById(videoElmId);
-  if (!remoteVideoElm) {
+const playVideoStream = (videoElmClass, stream) => {
+  if (videoElmClass === "myVideo") {
     const newVideoElm = document.createElement("video");
-    newVideoElm.setAttribute("id", videoElmId);
-    newVideoElm.muted = true;
+    newVideoElm.setAttribute("class", videoElmClass);
+    // newVideoElm.muted = true;
     newVideoElm.srcObject = stream;
     newVideoElm.addEventListener("loadedmetadata", () => {
       newVideoElm.play();
     });
     videoGrid.append(newVideoElm);
   } else {
-    remoteVideoElm.srcObject = stream;
-    remoteVideoElm.addEventListener("loadedmetadata", () => {
-      remoteVideoElm.play();
+    const newVideoElm = document.createElement("video");
+    newVideoElm.setAttribute("class", videoElmClass);
+    // newVideoElm.muted = true;
+    newVideoElm.srcObject = stream;
+    newVideoElm.addEventListener("loadedmetadata", () => {
+      newVideoElm.play();
     });
+    videoGrid.append(newVideoElm);
   }
 };
 
-const connectToNewServer = (anothorUserId, stream) => {
-  //   console.log("New user has Id " + AnothorUserId);
-  // Call a peer, providing our mediaStream
-  //Phia nguoi Goi
-  const call = peer.call(anothorUserId, stream);
-  call.on("stream", (remoteVideoStream) => {
-    // addVideoStream(newVideoElm, userVideoStream);
-    console.log("Remote Video 1");
-    playVideoStream2("remoteVideo", remoteVideoStream);
+//Actions - Jquery
+const msgInput = $("#inputMessageId");
+// console.log(msg);
+$("html").keydown((e) => {
+  if (e.which == 13 && msgInput.val().length !== 0) {
+    socket.emit("message", { msg: msgInput.val() });
+    msgInput.val("");
+  }
+});
+
+socket.on("create-message", (data) => {
+  const { msg } = data;
+  console.log(msg);
+  const msgWrapper = $("#messagesId");
+  console.log(msgWrapper);
+  msgWrapper.append(`<li class="message">User: ${msg}</li>`);
+  scrollToBottom();
+});
+
+//build func
+const scrollToBottom = () => {
+  const chatWindowElm = $(".main__chatWindow");
+  chatWindowElm.scrollTop(chatWindowElm.prop("scrollHeight"));
+};
+
+//actions client
+
+$(document).ready(function () {
+  muteBtnElm.click(handleOnMute);
+  stopBtnElm.click(handleOnStop);
+});
+
+const handleOnMute = () => {
+  // console.log(myStreamVideoSave);
+  if (myStreamVideoSave) {
+    const enabled = myStreamVideoSave.getAudioTracks()[0].enabled;
+    console.log(enabled);
+    if (enabled) {
+      myStreamVideoSave.getAudioTracks()[0].enabled = false;
+      setMuteIconButton(false);
+    } else {
+      myStreamVideoSave.getAudioTracks()[0].enabled = true;
+      setMuteIconButton(true);
+    }
+  }
+};
+
+const handleOnStop = () => {
+  if (myStreamVideoSave) {
+    const enabled = myStreamVideoSave.getVideoTracks()[0].enabled;
+    if (enabled) {
+      myStreamVideoSave.getVideoTracks()[0].enabled = false;
+      setStopIconButton(false);
+    } else {
+      myStreamVideoSave.getVideoTracks()[0].enabled = true;
+      setStopIconButton(true);
+    }
+  }
+};
+
+const setMuteIconButton = (flag) => {
+  console.log(flag);
+  const htmlUnMute = `<i class="fa fa-microphone" aria-hidden="true"></i><span>Mute</span>`;
+  const htmlMute = `<i class="fa fa-microphone-slash  " aria-hidden="true"></i><span>UnMute</span>`;
+  muteBtnElm.html(flag ? htmlUnMute : htmlMute);
+  muteBtnElm.css({
+    color: flag ? "#fff" : "red",
+    "text-shadow": flag ? " 0px 0px 5px #fff" : " 0px 0px 5px red",
+  });
+};
+
+const setStopIconButton = (flag) => {
+  console.log(flag);
+  const htmlUnStop = `<i class="fa fa-video-camera" aria-hidden="true"></i>
+  <span>Stop Video</span>`;
+  const htmlStop = `<i class="fa fa-video-camera" aria-hidden="true"></i>
+  <span>Play Video</span>`;
+  stopBtnElm.html(flag ? htmlUnStop : htmlStop);
+  stopBtnElm.css({
+    color: flag ? "#fff" : "red",
+    "text-shadow": flag ? " 0px 0px 5px #fff" : " 0px 0px 5px red",
   });
 };
