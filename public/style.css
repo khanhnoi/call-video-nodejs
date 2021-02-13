@@ -133,6 +133,19 @@ body {
     color: #fff;
 }
 
+.main__rightChat {
+    width: 20vw;
+    height: 100vh;
+    border: thin solid #fff;
+    display: flex;
+    flex-direction: column;
+    background: #242424;
+    position: fixed;
+    top: 0;
+    right: -20vw;
+    transition: 0.5s;
+}
+
 .main__chatWindow {
     flex-grow: 1;
     max-height: 100vh;

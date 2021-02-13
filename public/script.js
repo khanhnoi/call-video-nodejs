@@ -182,9 +182,11 @@ const handleOnStop = () => {
 };
 
 const handleOnChatWindow = () => {
-  const flag = localStorage.getItem("chatWindow") || true;
-  console.log(flag);
+  let flag = localStorage.getItem("chatWindow") || true;
+  flag = flag === "false" ? false : true;
   setChatIconButton(flag);
+  displayChatWindow(flag);
+  localStorage.setItem("chatWindow", flag ? false : true);
 };
 
 const setChatIconButton = (flag) => {
@@ -194,10 +196,17 @@ const setChatIconButton = (flag) => {
   <span>UnChat</span>`;
   // chatBtnElm.html(flag === "true" ? htmlUnChat : htmlChat);
   chatBtnElm.css({
-    color: flag === "true" ? "#fff" : "#666",
-    "text-shadow": flag === "true" ? " 0px 0px 5px #fff" : " 0px 0px 5px #666",
+    color: flag ? "#fff" : "#666",
+    "text-shadow": flag ? " 0px 0px 5px #fff" : " 0px 0px 5px #666",
   });
-  localStorage.setItem("chatWindow", flag === "true" ? false : true);
+};
+
+const displayChatWindow = (flag) => {
+  if (flag) {
+    $(".main__rightChat").css("right", "0");
+  } else {
+    $(".main__rightChat").css("right", "-20vw");
+  }
 };
 const setMuteIconButton = (flag) => {
   const htmlUnMute = `<i class="fa fa-microphone" aria-hidden="true"></i><span>Mute</span>`;
