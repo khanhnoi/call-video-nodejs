@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
       .broadcast.emit("user-connected", { anotherUserId: peerId });
     socket.on("message", (data) => {
       const { msg } = data;
-      console.log(msg);
+      // console.log(msg);
 
       io.to(roomId).emit("create-message", { msg });
     });

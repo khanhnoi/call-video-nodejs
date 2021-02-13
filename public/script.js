@@ -3,19 +3,30 @@ const btnCam = document.getElementById("onCam");
 const inputMsg = document.getElementById("inputMessageId");
 const muteBtnElm = $("#muteBtnId");
 const stopBtnElm = $("#stopBtnId");
+const chatBtnElm = $("#chatBtnId");
+// localStorage.setItem("chatWindow", true);
+const chatStatus = true;
 const socket = io("/");
 const peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
   port: "5000",
 });
-const callList = [];
+const callList = []; //object
+const sizeObj = (obj) => {
+  let size = 0,
+    key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
+};
 let myStreamVideoSave;
 
 peer.on("open", function (peerId) {
   console.log("My peer ID is: " + peerId);
   const titleTdElm = document.getElementById("peerId");
-  titleTdElm.append(peerId);
+  // titleTdElm.append(peerId);
   socket.emit("join-room", { roomId: roomId, peerId: peerId });
 });
 
@@ -42,6 +53,11 @@ OpenStream().then(function (myVideoStream) {
         console.log("remote of send");
         playVideoStream("remoteVideo", remoteStreamVideo);
         callList[call.peer] = call;
+        const totalVideo = sizeObj(callList) + 1;
+        if (totalVideo > 2) {
+          const w = Math.floor(100 / totalVideo);
+          $("video").css("width", `${w}%`);
+        }
       }
     });
   });
@@ -55,9 +71,19 @@ peer.on("call", function (call) {
     call.on("stream", function (remoteStreamVideo) {
       // Show stream in some video/canvas element.
       if (!callList[call.peer]) {
+        callList[call.peer] = call;
+        const totalVideo = sizeObj(callList) + 1;
+        if (totalVideo > 6) return;
+
         console.log("remote of receive");
         playVideoStream("remoteVideoReceive", remoteStreamVideo);
-        callList[call.peer] = call;
+
+        if (totalVideo === 2 || totalVideo === 3) {
+          const w = Math.floor(100 / totalVideo);
+          $("video").css("width", `${w}%`);
+        } else {
+          $("video").css("width", `33%`);
+        }
       }
     });
   });
@@ -123,6 +149,7 @@ const scrollToBottom = () => {
 $(document).ready(function () {
   muteBtnElm.click(handleOnMute);
   stopBtnElm.click(handleOnStop);
+  chatBtnElm.click(handleOnChatWindow);
 });
 
 const handleOnMute = () => {
@@ -142,6 +169,7 @@ const handleOnMute = () => {
 
 const handleOnStop = () => {
   if (myStreamVideoSave) {
+    // myStreamVideoSave.getTracks().forEach((track) => track.stop());
     const enabled = myStreamVideoSave.getVideoTracks()[0].enabled;
     if (enabled) {
       myStreamVideoSave.getVideoTracks()[0].enabled = false;
@@ -153,10 +181,27 @@ const handleOnStop = () => {
   }
 };
 
-const setMuteIconButton = (flag) => {
+const handleOnChatWindow = () => {
+  const flag = localStorage.getItem("chatWindow") || true;
   console.log(flag);
+  setChatIconButton(flag);
+};
+
+const setChatIconButton = (flag) => {
+  const htmlUnChat = `<i class="fa fa-comment" aria-hidden="true"></i>
+  <span>Chat</span>`;
+  const htmlChat = `<i class="fas fa-comment-slash" aria-hidden="true"></i>
+  <span>UnChat</span>`;
+  // chatBtnElm.html(flag === "true" ? htmlUnChat : htmlChat);
+  chatBtnElm.css({
+    color: flag === "true" ? "#fff" : "#666",
+    "text-shadow": flag === "true" ? " 0px 0px 5px #fff" : " 0px 0px 5px #666",
+  });
+  localStorage.setItem("chatWindow", flag === "true" ? false : true);
+};
+const setMuteIconButton = (flag) => {
   const htmlUnMute = `<i class="fa fa-microphone" aria-hidden="true"></i><span>Mute</span>`;
-  const htmlMute = `<i class="fa fa-microphone-slash  " aria-hidden="true"></i><span>UnMute</span>`;
+  const htmlMute = `<i class="fa fa-microphone-slash" aria-hidden="true"></i><span>UnMute</span>`;
   muteBtnElm.html(flag ? htmlUnMute : htmlMute);
   muteBtnElm.css({
     color: flag ? "#fff" : "red",
@@ -165,10 +210,10 @@ const setMuteIconButton = (flag) => {
 };
 
 const setStopIconButton = (flag) => {
-  console.log(flag);
+  // console.log(flag);
   const htmlUnStop = `<i class="fa fa-video-camera" aria-hidden="true"></i>
   <span>Stop Video</span>`;
-  const htmlStop = `<i class="fa fa-video-camera" aria-hidden="true"></i>
+  const htmlStop = `<i class="fa fa-pause" aria-hidden="true"></i>
   <span>Play Video</span>`;
   stopBtnElm.html(flag ? htmlUnStop : htmlStop);
   stopBtnElm.css({
