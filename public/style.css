@@ -33,8 +33,16 @@ body {
     flex-wrap: wrap;
 }
 
+.main .main__left .main__videos.w33 video {
+    width: 33% !important;
+}
+
+.main .main__left .main__videos.w50 video {
+    width: 50% !important;
+}
+
 .main .main__left .main__videos video {
-    width: 50%;
+    /* width: 50%; */
     object-fit: cover;
     border: 2px solid #00f;
     border-radius: 5px;
@@ -46,13 +54,14 @@ body {
     border: 2px solid #f00;
 }
 
-.main .main__left .main__videos video.remoteVideo {
+
+/* .main .main__left .main__videos video.remoteVideo {
     border: 2px solid #00f;
 }
 
 .main .main__left .main__videos video.remoteVideoReceive {
     border: thin solid #00f;
-}
+} */
 
 .main__controls {
     width: 100%;

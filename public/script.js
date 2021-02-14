@@ -4,7 +4,7 @@ const inputMsg = document.getElementById("inputMessageId");
 const muteBtnElm = $("#muteBtnId");
 const stopBtnElm = $("#stopBtnId");
 const chatBtnElm = $("#chatBtnId");
-// localStorage.setItem("chatWindow", true);
+localStorage.setItem("chatWindow", false);
 const chatStatus = true;
 const socket = io("/");
 const peer = new Peer(undefined, {
@@ -25,6 +25,7 @@ let myStreamVideoSave;
 
 peer.on("open", function (peerId) {
   console.log("My peer ID is: " + peerId);
+  myPeerId = peerId;
   const titleTdElm = document.getElementById("peerId");
   // titleTdElm.append(peerId);
   //because  const roomId = "<%= roomId %>"
@@ -68,7 +69,7 @@ peer.on("call", function (call) {
   OpenStream().then((myVideoStream) => {
     myStreamVideoSave = myVideoStream;
     call.answer(myVideoStream); // Answer the call with an A/V stream.
-    console.log("answer");
+    // console.log("answer");
     call.on("stream", function (remoteStreamVideo) {
       // Show stream in some video/canvas element.
       if (!callList[call.peer]) {
@@ -79,13 +80,6 @@ peer.on("call", function (call) {
         console.log("remote of receive");
         const anotherUserId = call.peer;
         playVideoStream(anotherUserId, remoteStreamVideo);
-
-        // if (totalVideo === 2 || totalVideo === 3) {
-        //   const w = Math.floor(100 / totalVideo);
-        //   $("video").css("width", `${w}%`);
-        // } else {
-        //   $("video").css("width", `33%`);
-        // }
       }
     });
   });
@@ -121,22 +115,13 @@ const playVideoStream = (videoElmClass, stream) => {
   }
 };
 
-//Actions - Jquery
-const msgInput = $("#inputMessageId");
-// console.log(msg);
-$("html").keydown((e) => {
-  if (e.which == 13 && msgInput.val().length !== 0) {
-    socket.emit("message", { msg: msgInput.val() });
-    msgInput.val("");
-  }
-});
-
 socket.on("create-message", (data) => {
-  const { msg } = data;
-  console.log(msg);
+  const { msg, nameUser } = data;
+  // console.log(nameUser);
+  // console.log(msg);
   const msgWrapper = $("#messagesId");
-  console.log(msgWrapper);
-  msgWrapper.append(`<li class="message">User: ${msg}</li>`);
+  // console.log(msgWrapper);
+  msgWrapper.append(`<li class="message">${nameUser}: ${msg}</li>`);
   scrollToBottom();
 });
 
@@ -147,18 +132,27 @@ const scrollToBottom = () => {
 };
 
 //actions client
-
+//Actions - Jquery
 $(document).ready(function () {
   muteBtnElm.click(handleOnMute);
   stopBtnElm.click(handleOnStop);
   chatBtnElm.click(handleOnChatWindow);
+
+  const msgInput = $("#inputMessageId");
+  // console.log(msg);
+  $("html").keydown((e) => {
+    if (e.which == 13 && msgInput.val().length !== 0) {
+      socket.emit("message", { msg: msgInput.val(), socketId: socket.id });
+      msgInput.val("");
+    }
+  });
 });
 
 const handleOnMute = () => {
   // console.log(myStreamVideoSave);
   if (myStreamVideoSave) {
     const enabled = myStreamVideoSave.getAudioTracks()[0].enabled;
-    console.log(enabled);
+    // console.log(enabled);
     if (enabled) {
       myStreamVideoSave.getAudioTracks()[0].enabled = false;
       setMuteIconButton(false);
@@ -184,19 +178,16 @@ const handleOnStop = () => {
 };
 
 const handleOnChatWindow = () => {
-  let flag = localStorage.getItem("chatWindow") || true;
+  let flag = localStorage.getItem("chatWindow");
   flag = flag === "false" ? false : true;
-  setChatIconButton(flag);
-  displayChatWindow(flag);
+  // console.log(flag);
+  setChatIconButton(!flag);
+  displayChatWindow(!flag);
   localStorage.setItem("chatWindow", flag ? false : true);
 };
 
 const setChatIconButton = (flag) => {
-  const htmlUnChat = `<i class="fa fa-comment" aria-hidden="true"></i>
-  <span>Chat</span>`;
-  const htmlChat = `<i class="fas fa-comment-slash" aria-hidden="true"></i>
-  <span>UnChat</span>`;
-  // chatBtnElm.html(flag === "true" ? htmlUnChat : htmlChat);
+  // console.log(flag);
   chatBtnElm.css({
     color: flag ? "#fff" : "#666",
     "text-shadow": flag ? " 0px 0px 5px #fff" : " 0px 0px 5px #666",
@@ -239,13 +230,12 @@ socket.on("update-room", (data) => {
   console.log(" totalUsers");
   console.log(totalUsers);
   //styles change
-  if (totalUsers === 2 || totalUsers === 3) {
-    const w = Math.floor(100 / totalUsers);
-    $("video").css("width", `${w}%`);
-  } else if (totalUsers === 1) {
-    $("video").css("width", `50%`);
+  if (totalUsers > 2) {
+    $(".main__videos").addClass("w33");
+    $(".main__videos").removeClass("w50");
   } else {
-    $("video").css("width", `33%`);
+    $(".main__videos").removeClass("w33");
+    $(".main__videos").addClass("w50");
   }
   //room change
   const htmlTotalUsers = `<i class="fa fa-users" aria-hidden="true"></i> <h5>Total Users: ${totalUsers}</h5>`;

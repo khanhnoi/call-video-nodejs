@@ -1,19 +1,19 @@
 let users = [];
 
 //join user to chat
-function userJoin(peerId, socketId, roomId, username) {
+function userJoin(peerId, socketId, roomId, userName) {
   // this.id = id;
   // this.username =username,
   // this.room =room
   // const user = { id, username, room };
-  const user = { peerId, socketId, roomId, username };
+  const user = { peerId, socketId, roomId, userName: `User ${users.length}` };
   users.push(user);
   return user;
 }
 
 // get current user
 function getCurrentUser(socketId) {
-  return users.find((user) => (user.socketId = socketId));
+  return users.find((user) => user.socketId === socketId);
 }
 
 //User leaves

@@ -33,7 +33,8 @@ io.on("connection", (socket) => {
   socket.on("join-room", (data) => {
     console.log("+ A user join Room !");
     const { roomId, peerId } = data;
-    const user = userJoin(peerId, socket.id, roomId, "No Name");
+    const user = userJoin(peerId, socket.id, roomId);
+    console.log(user);
     console.log(`+ ${peerId} JOINED ROOM ${roomId}`);
     socket.join(roomId);
     socket
@@ -41,10 +42,13 @@ io.on("connection", (socket) => {
       .broadcast.emit("user-connected", { anotherUserId: peerId });
     io.to(roomId).emit("update-room", { totalUsers: getUsersOnline() });
     socket.on("message", (data) => {
-      const { msg } = data;
+      const { msg, socketId } = data;
       // console.log(msg);
-
-      io.to(roomId).emit("create-message", { msg });
+      const userSend = getCurrentUser(socketId);
+      const nameUserSend = userSend.userName;
+      console.log("userSend");
+      console.log(userSend);
+      io.to(roomId).emit("create-message", { msg, nameUser: nameUserSend });
     });
   });
   socket.on("disconnect", () => {
