@@ -6,7 +6,7 @@ function userJoin(peerId, socketId, roomId, username) {
   // this.username =username,
   // this.room =room
   // const user = { id, username, room };
-  const user = { peerId, socketId, roomId };
+  const user = { peerId, socketId, roomId, username };
   users.push(user);
   return user;
 }
@@ -18,18 +18,19 @@ function getCurrentUser(socketId) {
 
 //User leaves
 function userLeave(socketId) {
-  console.log(users);
+  // console.log(users);
   const index = users.findIndex((user) => user.socketId === socketId);
   console.log(index);
   // delete user leave
   if (index !== -1) {
-    console.log("user leave:");
+    // console.log("user leave:");
     const userL = users.splice(index, 1);
-    console.log(userL);
-    console.log("users sau do:");
-    console.log(users);
+    // console.log(userL);
+    // console.log("users sau do:");
+    // console.log(users);
     return userL[0];
   }
+  return null;
 }
 
 //get users from Room

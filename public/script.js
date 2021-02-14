@@ -52,7 +52,7 @@ OpenStream().then(function (myVideoStream) {
       // Show stream in some video/canvas element.
       if (!callList[call.peer]) {
         console.log("remote of send");
-        playVideoStream("remoteVideo", remoteStreamVideo);
+        playVideoStream(anotherUserId, remoteStreamVideo);
         callList[call.peer] = call;
         const totalVideo = sizeObj(callList) + 1;
         if (totalVideo > 2) {
@@ -77,14 +77,15 @@ peer.on("call", function (call) {
         if (totalVideo > 6) return;
 
         console.log("remote of receive");
-        playVideoStream("remoteVideoReceive", remoteStreamVideo);
+        const anotherUserId = call.peer;
+        playVideoStream(anotherUserId, remoteStreamVideo);
 
-        if (totalVideo === 2 || totalVideo === 3) {
-          const w = Math.floor(100 / totalVideo);
-          $("video").css("width", `${w}%`);
-        } else {
-          $("video").css("width", `33%`);
-        }
+        // if (totalVideo === 2 || totalVideo === 3) {
+        //   const w = Math.floor(100 / totalVideo);
+        //   $("video").css("width", `${w}%`);
+        // } else {
+        //   $("video").css("width", `33%`);
+        // }
       }
     });
   });
@@ -234,9 +235,24 @@ const setStopIconButton = (flag) => {
 
 //room
 socket.on("update-room", (data) => {
-  const { totalUsers } = data;
+  const { totalUsers, peerIdUserDisconnect } = data;
   console.log(" totalUsers");
   console.log(totalUsers);
+  //styles change
+  if (totalUsers === 2 || totalUsers === 3) {
+    const w = Math.floor(100 / totalUsers);
+    $("video").css("width", `${w}%`);
+  } else if (totalUsers === 1) {
+    $("video").css("width", `50%`);
+  } else {
+    $("video").css("width", `33%`);
+  }
+  //room change
   const htmlTotalUsers = `<i class="fa fa-users" aria-hidden="true"></i> <h5>Total Users: ${totalUsers}</h5>`;
   $(".main__totalUsers").html(htmlTotalUsers);
+
+  //videos remove
+  if (peerIdUserDisconnect) {
+    $(`.${peerIdUserDisconnect}`).remove();
+  }
 });

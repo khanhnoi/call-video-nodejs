@@ -50,8 +50,13 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("+ user disconnected: ");
     const userL = userLeave(socket.id);
-    // console.log(userL);
-    io.to(userL.roomId).emit("update-room", { totalUsers: getUsersOnline() });
+    if (userL) {
+      io.to(userL.roomId).emit("update-room", {
+        totalUsers: getUsersOnline(),
+        peerIdUserDisconnect: userL.peerId,
+      });
+    }
+
     // console.log(socket.id);
   });
 });
