@@ -27,6 +27,7 @@ peer.on("open", function (peerId) {
   console.log("My peer ID is: " + peerId);
   const titleTdElm = document.getElementById("peerId");
   // titleTdElm.append(peerId);
+  //because  const roomId = "<%= roomId %>"
   socket.emit("join-room", { roomId: roomId, peerId: peerId });
 });
 
@@ -230,3 +231,12 @@ const setStopIconButton = (flag) => {
     "text-shadow": flag ? " 0px 0px 5px #fff" : " 0px 0px 5px red",
   });
 };
+
+//room
+socket.on("update-room", (data) => {
+  const { totalUsers } = data;
+  console.log(" totalUsers");
+  console.log(totalUsers);
+  const htmlTotalUsers = `<i class="fa fa-users" aria-hidden="true"></i> <h5>Total Users: ${totalUsers}</h5>`;
+  $(".main__totalUsers").html(htmlTotalUsers);
+});
