@@ -33,24 +33,38 @@ body {
     flex-wrap: wrap;
 }
 
-.main .main__left .main__videos.w33 video {
+video {
+    width: 100%;
+}
+
+.main .main__left .main__videos.w33 div {
     width: 33% !important;
 }
 
-.main .main__left .main__videos.w50 video {
+.main .main__left .main__videos.w50 div {
     width: 50% !important;
 }
 
 .main .main__left .main__videos video {
     /* width: 50%; */
     object-fit: cover;
-    border: 2px solid #00f;
-    border-radius: 5px;
     /* flex-grow: 1; */
     /* height: 100%; */
 }
 
-.main .main__left .main__videos video.myVideo {
+.main .main__left .main__videos div {
+    border: 2px solid #00f;
+    border-radius: 5px;
+    position: relative;
+}
+
+.main .main__left .main__videos div p.nameVideoId {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.main .main__left .main__videos div.myVideo {
     border: 2px solid #f00;
 }
 
@@ -163,6 +177,10 @@ body {
     margin-bottom: 0;
 }
 
+.main__notifications {
+    color: #fff
+}
+
 .main__rightChat {
     width: 20vw;
     height: 100vh;
@@ -223,4 +241,5 @@ body {
 .main__messageContainer input {
     width: 100%;
     min-height: 27px;
+    outline: none;
 }

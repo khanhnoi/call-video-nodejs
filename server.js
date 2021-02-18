@@ -17,6 +17,7 @@ const {
   userLeave,
   getUsersRoom,
   getUsersOnline,
+  getNameUsers,
 } = require("./utils/user");
 
 app.set("view engine", "ejs");
@@ -31,16 +32,20 @@ server.listen(PORT, function () {
 
 io.on("connection", (socket) => {
   socket.on("join-room", (data) => {
-    console.log("+ A user join Room !");
-    const { roomId, peerId } = data;
-    const user = userJoin(peerId, socket.id, roomId);
-    console.log(user);
+    const { roomId, peerId, userName } = data;
+    console.log(`+ ${userName} join Room !`);
+    const user = userJoin(peerId, socket.id, roomId, userName);
+    // console.log(user);
     console.log(`+ ${peerId} JOINED ROOM ${roomId}`);
+    console.log(getNameUsers());
     socket.join(roomId);
     socket
       .to(roomId)
       .broadcast.emit("user-connected", { anotherUserId: peerId });
-    io.to(roomId).emit("update-room", { totalUsers: getUsersOnline() });
+    io.to(roomId).emit("update-room", {
+      totalUsers: getUsersOnline(),
+      nameUsers: getNameUsers(),
+    });
     socket.on("message", (data) => {
       const { msg, socketId } = data;
       // console.log(msg);
@@ -58,6 +63,7 @@ io.on("connection", (socket) => {
       io.to(userL.roomId).emit("update-room", {
         totalUsers: getUsersOnline(),
         peerIdUserDisconnect: userL.peerId,
+        nameUsers: getNameUsers(),
       });
     }
 

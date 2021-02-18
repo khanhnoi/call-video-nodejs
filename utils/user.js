@@ -6,7 +6,7 @@ function userJoin(peerId, socketId, roomId, userName) {
   // this.username =username,
   // this.room =room
   // const user = { id, username, room };
-  const user = { peerId, socketId, roomId, userName: `User ${users.length}` };
+  const user = { peerId, socketId, roomId, userName: userName };
   users.push(user);
   return user;
 }
@@ -41,9 +41,17 @@ function getUsersRoom(room) {
 function getUsersOnline() {
   return users.length;
 }
+function getNameUsers() {
+  let nameList = [];
+  for (user of users) {
+    nameList.push(user && user.userName);
+  }
+  console.log(nameList);
+  return nameList;
+}
 
 module.exports = {
-  users,
+  getNameUsers,
   userJoin,
   getCurrentUser,
   userLeave,

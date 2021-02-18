@@ -4,6 +4,7 @@ const inputMsg = document.getElementById("inputMessageId");
 const muteBtnElm = $("#muteBtnId");
 const stopBtnElm = $("#stopBtnId");
 const chatBtnElm = $("#chatBtnId");
+const leaveBtnElm = $("#leaveBtnId");
 localStorage.setItem("chatWindow", false);
 const chatStatus = true;
 const socket = io("/");
@@ -26,10 +27,14 @@ let myStreamVideoSave;
 peer.on("open", function (peerId) {
   console.log("My peer ID is: " + peerId);
   myPeerId = peerId;
-  const titleTdElm = document.getElementById("peerId");
+  const myName = localStorage.getItem("name") || "No Name";
   // titleTdElm.append(peerId);
   //because  const roomId = "<%= roomId %>"
-  socket.emit("join-room", { roomId: roomId, peerId: peerId });
+  socket.emit("join-room", {
+    roomId: roomId,
+    peerId: peerId,
+    userName: myName,
+  });
 });
 
 // myVideoElm.muted = true;
@@ -56,10 +61,10 @@ OpenStream().then(function (myVideoStream) {
         playVideoStream(anotherUserId, remoteStreamVideo);
         callList[call.peer] = call;
         const totalVideo = sizeObj(callList) + 1;
-        if (totalVideo > 2) {
-          const w = Math.floor(100 / totalVideo);
-          $("video").css("width", `${w}%`);
-        }
+        // if (totalVideo > 2) {
+        //   const w = Math.floor(100 / totalVideo);
+        //   $("video").css("width", `${w}%`);
+        // }
       }
     });
   });
@@ -93,25 +98,37 @@ function OpenStream() {
   });
 }
 
-const playVideoStream = (videoElmClass, stream) => {
+const playVideoStream = (videoElmClass, stream, userName) => {
   if (videoElmClass === "myVideo") {
+    const newDiv = document.createElement("div");
     const newVideoElm = document.createElement("video");
-    newVideoElm.setAttribute("class", videoElmClass);
+    const newNameVideo = document.createElement("p");
+    newNameVideo.setAttribute("class", "nameVideoId");
+    newNameVideo.append(localStorage.getItem("name"));
+    newDiv.append(newVideoElm);
+    newDiv.append(newNameVideo);
+    newDiv.setAttribute("class", videoElmClass);
     // newVideoElm.muted = true;
     newVideoElm.srcObject = stream;
     newVideoElm.addEventListener("loadedmetadata", () => {
       newVideoElm.play();
     });
-    videoGrid.append(newVideoElm);
+    videoGrid.append(newDiv);
   } else {
+    const newDiv = document.createElement("div");
     const newVideoElm = document.createElement("video");
-    newVideoElm.setAttribute("class", videoElmClass);
+    const newNameVideo = document.createElement("p");
+    newNameVideo.setAttribute("class", "nameVideoId");
+    newNameVideo.append(localStorage.getItem("name"));
+    newDiv.append(newVideoElm);
+    newDiv.append(newNameVideo);
+    newDiv.setAttribute("class", videoElmClass);
     // newVideoElm.muted = true;
     newVideoElm.srcObject = stream;
     newVideoElm.addEventListener("loadedmetadata", () => {
       newVideoElm.play();
     });
-    videoGrid.append(newVideoElm);
+    videoGrid.append(newDiv);
   }
 };
 
@@ -137,6 +154,9 @@ $(document).ready(function () {
   muteBtnElm.click(handleOnMute);
   stopBtnElm.click(handleOnStop);
   chatBtnElm.click(handleOnChatWindow);
+  leaveBtnElm.click(function () {
+    window.location.href = "./";
+  });
 
   const msgInput = $("#inputMessageId");
   // console.log(msg);
@@ -226,9 +246,23 @@ const setStopIconButton = (flag) => {
 
 //room
 socket.on("update-room", (data) => {
-  const { totalUsers, peerIdUserDisconnect } = data;
-  console.log(" totalUsers");
-  console.log(totalUsers);
+  const { totalUsers, peerIdUserDisconnect, nameUsers } = data;
+  // console.log(" totalUsers");
+  // console.log(totalUsers);
+  console.log("nameUsers:");
+  console.log(nameUsers);
+  const nameUsersElm = document.getElementById("nameUsersId");
+  let node,
+    i = 0;
+  nameUsersElm.innerHTML = "";
+  for (nameUser of nameUsers) {
+    let node = document.createElement("li"); // Create a <li> node
+    let textnode = document.createTextNode(i + " - " + nameUser);
+    i++;
+    node.append(textnode);
+    nameUsersElm.append(node);
+  }
+
   //styles change
   if (totalUsers > 2) {
     $(".main__videos").addClass("w33");

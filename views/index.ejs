@@ -4,15 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Đây là 1 trang bạn có thể tạo phòng, share link để call Video Free. Tạo bởi Khánh Nòi">
+    <link rel="shortcut icon" href="http://khanhnoi.mobie.in/ico/khanh-noi.ico" type="image/x-icon">
     <title>
         <%- title %>
     </title>
+    <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-    <h1>
-        khanh noi Index
-    </h1>
+    <form class="box" action="">
+        <input id="nameId" name="name" type="text" placeholder="Name" required>
+        <input id="roomId" name="room" type="text" placeholder="Room" value="defaultRoom" required>
+        <input id="btnJoinId" type="submit" value="Join">
+    </form>
+    <script>
+        let nameInputElm = document.getElementById("nameId");
+        let roomInputElm = document.getElementById("roomId");
+        let checkName = localStorage.getItem("name");
+        let checkRoom = localStorage.getItem("room");
+        if (checkName) nameInputElm.value = checkName
+        if (checkRoom) roomInputElm.value = checkRoom
+        document.getElementById("btnJoinId").addEventListener("click", function(e) {
+            e.preventDefault();
+            let name = nameInputElm.value;
+            let room = roomInputElm.value;
+
+            if (name && name != "" && room && room != "") {
+                localStorage.setItem("name", name);
+                localStorage.setItem("room", room);
+                console.log(name);
+                console.log(room);
+                window.location.href = "./" + room;
+
+            }
+
+        })
+    </script>
 </body>
 
 </html>
