@@ -11,7 +11,7 @@ const socket = io("/");
 const peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
-  port: "5000",
+  port: "5000" || "443",
 });
 const callList = []; //object
 const sizeObj = (obj) => {

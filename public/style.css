@@ -45,6 +45,17 @@ video {
     width: 50% !important;
 }
 
+.main .main__left .main__videos div p {
+    color: #000;
+    text-shadow: 0 0 2px #fff;
+    transition: .7s;
+}
+
+.main .main__left .main__videos div:hover p {
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+}
+
 .main .main__left .main__videos video {
     /* width: 50%; */
     object-fit: cover;

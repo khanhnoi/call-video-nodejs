@@ -9,8 +9,11 @@ router.get("/", function (req, res) {
 });
 
 router.get("/:roomId", function (req, res) {
-  console.log(req.params.roomId);
+  // console.log(req.params.roomId);
   // res.setHeader("Content-Type", "text/html");
-  res.render("room", { title: "ROOM ID", roomId: req.params.roomId });
+  res.render("room", {
+    title: "ROOM " + req.params.roomId,
+    roomId: req.params.roomId,
+  });
 });
 module.exports = router;
